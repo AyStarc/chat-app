@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final firebase = FirebaseAuth.instance;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -16,11 +19,31 @@ class _AuthScreenState extends State<AuthScreen> {
     final isValid =
         form.currentState!.validate(); // check currentState not null
 
-    if (isValid) {
-      form.currentState!.save();
-      // triggers onSaved in Form sub-widgets.
-      print(enteredEmail);
-      print(enteredPassword);
+    if (!isValid) {
+      return;
+    }
+
+    form.currentState!.save(); // triggers onSaved in Form sub-widgets.
+  }
+
+  void signup() async {
+    final isValid =
+        form.currentState!.validate(); // check currentState not null
+
+    if (!isValid) {
+      return;
+    }
+
+    form.currentState!.save(); // triggers onSaved in Form sub-widgets.
+
+    try {
+      final userCredentials = await firebase.createUserWithEmailAndPassword(
+          email: enteredEmail, password: enteredPassword);
+      print(UserCredential);
+    } on FirebaseAuthException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.message!)));
     }
   }
 
