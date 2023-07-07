@@ -1,4 +1,5 @@
 import 'package:chat_app/Screens/chat_screeen.dart';
+import 'package:chat_app/Screens/splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/Screens/auth.dart';
@@ -29,6 +30,11 @@ class App extends StatelessWidget {
         home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, snapshot) {
+
+            if(snapshot.connectionState == ConnectionState.waiting) {
+              return const SplashScreen();
+            }
+
             if (snapshot.hasData) {
               return const ChatScreen();
             }
@@ -38,4 +44,5 @@ class App extends StatelessWidget {
   }
 }
 
+// StreamBuilder is kind of a continuous listener.
 // FutureBuilder vs StreamBuilder.

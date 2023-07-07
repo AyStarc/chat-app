@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -10,8 +11,18 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text("Logged In!"),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("4 Baatein"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+              },
+              icon: const Icon(Icons.exit_to_app_outlined))
+        ],
+      ),
+      body: const Center(child: Text("Logged In!")),
     );
   }
 }

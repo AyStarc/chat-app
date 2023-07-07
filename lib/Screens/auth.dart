@@ -65,7 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: EdgeInsets.all(40),
+                padding: const EdgeInsets.all(40),
                 alignment: Alignment.center,
                 child: Image.asset("Assets/Images/pngwing.com (1).png"),
               ),
