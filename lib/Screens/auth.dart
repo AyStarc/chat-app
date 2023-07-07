@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-final firebase = FirebaseAuth.instance;
+final firebase = FirebaseAuth.instance; // an instance to be used throughout
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -15,7 +15,7 @@ class _AuthScreenState extends State<AuthScreen> {
   var enteredEmail = '';
   var enteredPassword = '';
 
-  void submit() {
+  void login() async {
     final isValid =
         form.currentState!.validate(); // check currentState not null
 
@@ -24,6 +24,15 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     form.currentState!.save(); // triggers onSaved in Form sub-widgets.
+
+    try {
+      final userCredentials = await firebase.signInWithEmailAndPassword(
+          email: enteredEmail, password: enteredPassword);
+    } on FirebaseAuthException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.message!)));
+    }
   }
 
   void signup() async {
@@ -39,7 +48,6 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       final userCredentials = await firebase.createUserWithEmailAndPassword(
           email: enteredEmail, password: enteredPassword);
-      print(UserCredential);
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
@@ -50,7 +58,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -72,13 +80,14 @@ class _AuthScreenState extends State<AuthScreen> {
                         children: [
                           TextFormField(
                             decoration: const InputDecoration(
+                                icon: Icon(Icons.mail),
                                 label: Text("Email Address")),
                             keyboardType: TextInputType.emailAddress,
                             autocorrect: false,
                             textCapitalization: TextCapitalization.none,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Please enter valid Email address';
+                                return 'Please enter Email address';
                               }
                               return null;
                             },
@@ -87,8 +96,8 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                           ),
                           TextFormField(
-                            decoration:
-                                const InputDecoration(label: Text("Password")),
+                            decoration: const InputDecoration(
+                                label: Text("Password"), icon: Icon(Icons.key)),
                             obscureText: true,
                             validator: (value) {
                               if (value == null || value.trim().length < 6) {
@@ -108,10 +117,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                   backgroundColor: Theme.of(context)
                                       .colorScheme
                                       .primaryContainer),
-                              onPressed: submit,
+                              onPressed: login,
                               child: const Text("Login")),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: signup,
                             child: const Text("Create a new account"),
                           )
                         ],
