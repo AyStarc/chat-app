@@ -1,23 +1,32 @@
-import 'package:chat_app/Screens/sign_up_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:chat_app/Widgets/user_image_picker.dart';
 
-final firebase = FirebaseAuth.instance; // an instance to be used throughout
+final firebase = FirebaseAuth.instance;
 
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({Key? key}) : super(key: key);
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
-  final form = GlobalKey<FormState>(); // key to the form
-  bool isLogin = false;
+class _SignUpScreenState extends State<SignUpScreen> {
+  final form = GlobalKey<FormState>();
+  var enteredUsername = '';
   var enteredEmail = '';
   var enteredPassword = '';
 
-  void login() async {
+  File? selectedImage;
+  bool isAuthenticating = false;
+
+  void signup() async {
+    setState(() {
+      isAuthenticating = true;
+    });
     final isValid =
         form.currentState!.validate(); // check currentState not null
 
@@ -27,30 +36,59 @@ class _AuthScreenState extends State<AuthScreen> {
 
     form.currentState!.save(); // triggers onSaved in Form sub-widgets.
 
+    if (selectedImage == null) {
+      return;
+    }
+
     try {
-      final userCredentials = await firebase.signInWithEmailAndPassword(
+      final userCredentials = await firebase.createUserWithEmailAndPassword(
+          email: enteredEmail, password: enteredPassword);
+
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('user_images')
+          .child('${userCredentials.user!.uid}.jpg');
+
+      await storageRef.putFile(selectedImage!);
+      final imageURL = await storageRef.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredentials.user!.uid)
+          .set({
+        'username': enteredUsername,
+        'email': enteredEmail,
+        'image_url': imageURL, //selectedImage
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Account Successfully Created")));
+
+      firebase.signInWithEmailAndPassword(
           email: enteredEmail, password: enteredPassword);
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.message!)));
     }
+
+    setState(() {
+      isAuthenticating = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+      appBar: AppBar(),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Container(
-                padding: const EdgeInsets.all(40),
-                alignment: Alignment.center,
-                child: Image.asset("Assets/Images/pngwing.com (1).png"),
-              ),
+              UserImagePicker((pickedImage) {
+                selectedImage = pickedImage;
+              }),
               Card(
                 margin: const EdgeInsets.all(12),
                 child: SingleChildScrollView(
@@ -63,10 +101,26 @@ class _AuthScreenState extends State<AuthScreen> {
                           TextFormField(
                             decoration: const InputDecoration(
                                 icon: Icon(Icons.mail),
+                                label: Text("Username")),
+                            autocorrect: false,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.trim().isEmpty ||
+                                  value.trim().length < 4) {
+                                return 'Min Username length should be 4';
+                              }
+                              return null;
+                            },
+                            onSaved: (val) {
+                              enteredUsername = val!;
+                            },
+                          ),
+                          TextFormField(
+                            decoration: const InputDecoration(
+                                icon: Icon(Icons.mail),
                                 label: Text("Email Address")),
                             keyboardType: TextInputType.emailAddress,
                             autocorrect: false,
-                            textCapitalization: TextCapitalization.none,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter Email address';
@@ -94,22 +148,9 @@ class _AuthScreenState extends State<AuthScreen> {
                           const SizedBox(
                             height: 12,
                           ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer),
-                              onPressed: login,
-                              child: const Text("Login")),
                           TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const SignUpScreen()),
-                              );
-                            },
-                            child: const Text("Create a new account"),
+                            onPressed: signup,
+                            child: const Text("Create account"),
                           )
                         ],
                       ),
