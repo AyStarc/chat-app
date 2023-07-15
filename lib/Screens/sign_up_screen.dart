@@ -105,9 +105,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             autocorrect: false,
                             validator: (value) {
                               if (value == null ||
-                                  value.trim().isEmpty ||
-                                  value.trim().length < 4) {
-                                return 'Min Username length should be 4';
+                                  value.trim().isEmpty) {
+                                return 'Enter valid username';
                               }
                               return null;
                             },

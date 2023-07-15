@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class NewMessage extends StatefulWidget {
-  const NewMessage({Key? key}) : super(key: key);
+  const NewMessage(this.id, {Key? key}) : super(key: key);
 
+  final String id;
   @override
   State<NewMessage> createState() => _NewMessageState();
 }
@@ -27,17 +28,35 @@ class _NewMessageState extends State<NewMessage> {
     }
 
     final user = firebase.currentUser!; // from FirebaseAuth
-    final userData = await FirebaseFirestore.instance // from FirebaseFirestore
-        .collection('users')
-        .doc(user.uid)
-        .get();
 
-    await FirebaseFirestore.instance.collection('chat').add({
+    // final senderData =
+    //     await FirebaseFirestore.instance // from FirebaseFirestore
+    //         .collection('users')
+    //         .doc(user.uid)
+    //         .get();
+    //
+    // final receiverData = await FirebaseFirestore.instance
+    //     .collection('users')
+    //     .doc(widget.id)
+    //     .get();
+
+    // await FirebaseFirestore.instance
+    //     .collection('chat')
+    //     .doc("${user.uid}_${widget.id}")
+    //     .set({
+    //   "sender": senderData["username"],
+    //   "receiver": receiverData["username"],
+    //   "senderImg": senderData["image_url"],
+    //   "receiverImg": receiverData["image_url"]
+    // });
+
+    await FirebaseFirestore.instance
+        .collection('chat')
+        .doc("${user.uid}_${widget.id}")
+        .collection("${user.uid}_${widget.id}")
+        .add({
       'text': enteredMessage,
       'createdAt': Timestamp.now(),
-      'userID': user.uid,
-      'username': userData.data()!['username'],
-      'userimage': userData.data()!['image_url']
     });
     messageController.clear();
   }
