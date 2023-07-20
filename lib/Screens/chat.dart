@@ -1,3 +1,5 @@
+import 'package:chat_app/Widgets/chat_messages.dart';
+import 'package:chat_app/Widgets/msg_bubble.dart';
 import 'package:chat_app/Widgets/new_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ class ChatOneToOne extends StatefulWidget {
 }
 
 class _ChatOneToOneState extends State<ChatOneToOne> {
+  String receiverID = '';
   String receiver = '';
   String imageurl = '';
 
@@ -27,19 +30,29 @@ class _ChatOneToOneState extends State<ChatOneToOne> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    receiverID = widget.id;
+    getUserDetails(receiverID);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("TO text"),
-      ),
-      body: Column(
-        children: [
-          SingleChildScrollView(
-            child: ListView.builder(itemBuilder: )
+        appBar: AppBar(
+          title: Text("To $receiver"),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(child: ChatMessages(receiverID)),
+              Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: NewMessage(widget.id))
+            ],
           ),
-          const NewMessage("dd")
-        ],
-      ),
-    );
+        ));
   }
 }

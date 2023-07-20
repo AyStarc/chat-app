@@ -1,14 +1,26 @@
 // Messages between users one to one
+
+import 'dart:developer';
+
+import 'package:chat_app/Widgets/msg_bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+FirebaseFirestore fire = FirebaseFirestore.instance;
+
 class ChatMessages extends StatelessWidget {
-  const ChatMessages({Key? key}) : super(key: key);
+  const ChatMessages(this.chatid, {Key? key}) : super(key: key);
+  final String chatid;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('chats').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('chat')
+            .doc("${FirebaseAuth.instance.currentUser!.uid}_$chatid")
+            .collection("${FirebaseAuth.instance.currentUser!.uid}_$chatid")
+            .snapshots(),
         builder: (ctx, chatSnapshots) {
           if (chatSnapshots.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -16,7 +28,7 @@ class ChatMessages extends StatelessWidget {
 
           // why using this expression
           // second expression in OR only evaluated if first false.
-          if (!chatSnapshots.hasData || chatSnapshots.data!.docs.isEmpty) {
+          if (!chatSnapshots.hasData) {
             return const Center(
               child: Text("Break the ice!"),
             );
@@ -27,7 +39,14 @@ class ChatMessages extends StatelessWidget {
               child: Text("Something went wrong."),
             );
           } else {
-            return const Text("data");
+            return ListView.builder(
+              itemBuilder: (ctx, indx) {
+                debugPrint(chatSnapshots.data!.docs[indx]["text"]);
+                return MsgBubble(chatSnapshots.data!.docs[indx]["text"],
+                    FirebaseAuth.instance.currentUser!.uid);
+              },
+              itemCount: chatSnapshots.data!.docs.length,
+            );
           }
         });
   }

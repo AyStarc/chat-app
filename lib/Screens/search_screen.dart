@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:chat_app/Screens/chats_list_screeen.dart';
 import 'package:chat_app/Widgets/chat_messages.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,6 +15,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   String searchValue = '';
   Map<String, String> map = {};
+  final sender = FirebaseAuth.instance.currentUser!; // from FirebaseAuth
+  final senderID = FirebaseAuth.instance.currentUser!.uid;
+  var receiverID = '';
 
   Future<void> suggestFunc() async {
     final sgsn = await FirebaseFirestore.instance.collection('users').get();
@@ -26,12 +27,12 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void addUser(String name) async {
-    final user = FirebaseAuth.instance.currentUser!; // from FirebaseAuth
+    receiverID = map[name]!;
 
     final senderData =
         await FirebaseFirestore.instance // from FirebaseFirestore
             .collection('users')
-            .doc(user.uid)
+            .doc(sender.uid)
             .get();
 
     final receiverData = await FirebaseFirestore.instance
@@ -41,8 +42,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
     await FirebaseFirestore.instance
         .collection('chat')
-        .doc("${user.uid}_${map[name]!}")
+        .doc("${sender.uid}_${map[name]!}")
         .set({
+      "senderID": receiverID,
+      "receiverID": senderID,
       "sender": senderData.data()!["username"],
       "receiver": name,
       "senderImg": senderData.data()!["image_url"],
@@ -55,12 +58,12 @@ class _SearchScreenState extends State<SearchScreen> {
         .collection('users')
         .doc(map[name])
         .collection('friends')
-        .doc(user.uid)
+        .doc(sender.uid)
         .set({});
 
     FirebaseFirestore.instance
         .collection('users')
-        .doc(user.uid)
+        .doc(sender.uid)
         .collection('friends')
         .doc(map[name])
         .set({});
@@ -85,7 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
       onSuggestionTap: (val) {
         addUser(val);
         Navigator.pop(context, MaterialPageRoute(builder: (ctx) {
-          return const ChatMessages();
+          return ChatMessages(receiverID);
         }));
       },
     ));
