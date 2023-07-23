@@ -14,6 +14,14 @@ class NewMessage extends StatefulWidget {
 class _NewMessageState extends State<NewMessage> {
   var messageController = TextEditingController();
 
+  String getConvoID(String senderID, String receiverID) {
+    if (senderID.hashCode <= receiverID.hashCode) {
+      return "${senderID}_$receiverID";
+    } else {
+      return "${receiverID}_$senderID";
+    }
+  }
+
   @override
   void dispose() {
     messageController.dispose();
@@ -52,9 +60,10 @@ class _NewMessageState extends State<NewMessage> {
 
     await FirebaseFirestore.instance
         .collection('chat')
-        .doc("${user.uid}_${widget.id}")
-        .collection("${user.uid}_${widget.id}")
-        .add({
+        .doc(getConvoID(user.uid, widget.id))
+        .collection(getConvoID(user.uid, widget.id))
+        .doc("${user.uid}_${Timestamp.now()}")
+        .set({
       'text': enteredMessage,
       'createdAt': Timestamp.now(),
     });

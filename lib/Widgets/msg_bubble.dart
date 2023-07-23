@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+FirebaseAuth fire = FirebaseAuth.instance;
 
 class MsgBubble extends StatefulWidget {
   const MsgBubble(this.text, this.senderID, {Key? key}) : super(key: key);
@@ -12,9 +15,17 @@ class MsgBubble extends StatefulWidget {
 class _MsgBubbleState extends State<MsgBubble> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Text(widget.text),
-      onLongPress: () {},
+    return SizedBox(
+      width: 200,
+      child: GestureDetector(
+        child: Text(
+          widget.text,
+          textAlign: (widget.senderID == fire.currentUser!.uid
+              ? TextAlign.right
+              : TextAlign.left),
+        ),
+        onLongPress: () {},
+      ),
     );
   }
 }
