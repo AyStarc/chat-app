@@ -23,6 +23,8 @@ class _ChatTileState extends State<ChatTile> {
     setState(() {
       str = temp.data()!["username"];
       imageurl = temp.data()!["image_url"];
+      // print("===============");
+      // print(imageurl);
     });
   }
 
@@ -42,9 +44,8 @@ class _ChatTileState extends State<ChatTile> {
       },
       child: ListTile(
         leading: CircleAvatar(
-          child: Image.network(
+          foregroundImage: NetworkImage(
             imageurl,
-            fit: BoxFit.contain,
           ),
         ),
         title: Text(str),

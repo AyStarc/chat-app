@@ -41,8 +41,18 @@ class _ChatOneToOneState extends State<ChatOneToOne> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          actions: [CircleAvatar(child: Image.network(imageurl))],
-          title: Text(receiver),
+          leadingWidth: 30,
+          backgroundColor: Colors.blue,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                foregroundImage: NetworkImage(imageurl),
+              ),
+              const SizedBox(width: 10),
+              Text(receiver),
+            ],
+          ),
         ),
         body: Center(
           child: Column(

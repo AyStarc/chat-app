@@ -61,7 +61,7 @@ class ChatMessages extends StatelessWidget {
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                    child: MsgBubble(chatSnapshots.data!.docs[indx]["text"],
+                    child: MsgBubble(chatSnapshots.data!.docs[indx],
                         chatSnapshots.data!.docs[indx].id.split("_")[0]),
                   ),
                 );
