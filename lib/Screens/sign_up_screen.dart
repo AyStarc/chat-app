@@ -44,12 +44,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final userCredentials = await firebase.createUserWithEmailAndPassword(
           email: enteredEmail, password: enteredPassword);
 
+      // to store images, separate space
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('user_images')
           .child('${userCredentials.user!.uid}.jpg');
 
       await storageRef.putFile(selectedImage!);
+
+      // imageurl of the stored image to be stored inside doc
       final imageURL = await storageRef.getDownloadURL();
 
       await FirebaseFirestore.instance
