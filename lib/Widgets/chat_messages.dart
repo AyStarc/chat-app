@@ -14,7 +14,7 @@ class ChatMessages extends StatelessWidget {
   const ChatMessages(this.receiverID, {Key? key}) : super(key: key);
   final String receiverID;
 
-  checkSenderOrReceiver() {}
+  // checkSenderOrReceiver() {}
   String getConvoID(String senderID, String receiverID) {
     if (senderID.hashCode <= receiverID.hashCode) {
       return "${senderID}_$receiverID";
